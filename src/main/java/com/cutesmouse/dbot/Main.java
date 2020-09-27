@@ -7,21 +7,39 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.emote.EmoteAddedEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 public class Main extends ListenerAdapter {
+    private static final ArrayList<Long> WORKS = new ArrayList<Long>(Arrays.asList(604278586962083841L));
     public static void main(String[] args) throws LoginException, InterruptedException {
-        JDA jda = new JDABuilder("NDc3ODI1Mzg1OTUwNzQwNTA0.W27fkQ.QWDwiYwnW5IKC6j7QoFvYanUxhQ").build().awaitReady();
+        JDA jda = JDABuilder.createDefault(getToken()).build().awaitReady();
         jda.addEventListener(new Main());
     }
-
+    public static String getToken() {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(Main.class.getResourceAsStream("/TOKEN")));
+        try {
+            String token = reader.readLine();
+            reader.close();
+            return token;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
     public boolean hasPrivateChannel(Member mem){
         return (mem.getGuild().getTextChannelsByName("private-"+mem.getUser().getId(),false).size() > 0);
     }
@@ -29,6 +47,7 @@ public class Main extends ListenerAdapter {
     private Category CATE;
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent e) {
+        if (!WORKS.contains(e.getGuild().getIdLong())) return;
         if (CATE == null) {
             CATE = e.getGuild().getCategoryById(757435601610866689L);
         }
@@ -62,5 +81,10 @@ public class Main extends ListenerAdapter {
                     .setFooter(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())).build()).queue();
 
         }
+    }
+
+    @Override
+    public void onEmoteAdded(@Nonnull EmoteAddedEvent event) {
+        super.onEmoteAdded(event);
     }
 }
